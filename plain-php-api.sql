@@ -86,7 +86,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `token`) VALUES
-(1, 'miskolc@nemletezik.cc', '17c025bbfcfc52116e76600a723f9937', '270%jidO4oJKiDuij$dja23\"!JfjIIFO4oloD');
+(1, 'miskolc@nemletezik.cc', '17c025bbfcfc52116e76600a723f9937', '270%jidO4oJKiDuij$dja23!JfjIIFO4oloD');
 
 -- --------------------------------------------------------
 

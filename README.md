@@ -1,4 +1,4 @@
-# Plain PHP REST API
+# Vanilla PHP REST API
 
 ## Endpoints (végpontok)
 

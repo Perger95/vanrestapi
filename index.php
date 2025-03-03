@@ -12,8 +12,13 @@ if ($development) {
 
 $resource = strtok($_SERVER['QUERY_STRING'], '=');
 require('auth.php');
+
 if ($resource == 'products') {
     require('products.php');
 }
+if ($resource == 'users') {
+    require('users.php');
+}
+
 
 echo json_encode($data);

@@ -18,6 +18,13 @@ if (in_array($_SERVER['QUERY_STRING'], $noAuthResorces[$_SERVER['REQUEST_METHOD'
 }
 
 // check the token
+$token = isset(apache_request_headers()['Token']) ? apache_request_headers()['Token'] : null;
+
+$stmt = $pdo->prepare('SELECT id FROM users WHERE token = ?');
+$stmt->execute([$token]);
+if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+    return true;
+}
 
 http_response_code(401);
 die('Authorizaton error');

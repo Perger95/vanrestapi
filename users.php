@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data = json_decode(file_get_contents('php://input'));
 
-    if ($_GET['users'] == 'login') {
+    if ($_GET['users'] ?? '' === 'login') {
        $stmt = $pdo->prepare('SELECT id, token FROM users WHERE email = ? AND password = ?');
        $stmt->execute([$data->email, md5($data->password)]);
        $data = $stmt->fetch(PDO::FETCH_ASSOC);

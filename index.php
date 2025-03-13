@@ -13,7 +13,7 @@ if ($development) {
 $resource = strtok($_SERVER['QUERY_STRING'], '=');
 require('auth.php');
 
-// Engedélyezzük a PATCH és DELETE metódusokat, ha az Apache nem támogatja őket
+// Itt erőltetve engedélyeztem a PATCH és DELETE metódusokat, mert teszteléskor olyan volt, mintha az Apache nem támogatná őket
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
     $_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
 }

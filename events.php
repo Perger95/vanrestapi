@@ -1,15 +1,33 @@
 <?php
 
-require('./secrets.php');
-require('./auth.php');
+require('./secrets.php'); // betöltjük az secrets.php-t
+require('./auth.php');   // betöltjük az auth.php-t
+require('./vendor/autoload.php'); // betöltjük a JWT könyvtárat
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+$headers = apache_request_headers();
+$token = $headers['Authorization'] ?? null;
+
+if (!$token) {
+    http_response_code(401);
+    die(json_encode(["error" => "Missing token!"]));
+}
+
+try {
+    $decoded = JWT::decode($token, new Key($secrets['jwt_secret'], 'HS256'));
+    $userId = $decoded->user_id; // kinyerjük a felhasználó azonosítóját a tokenből
+} catch (Exception $e) {
+    http_response_code(401);
+    die(json_encode(["error" => "Invalid token!"]));
+}
 
 
-
-// adatbázis kapcsolat létrehozása
+// adatbázis kapcsolat létrehozás
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Hiba dobása, ha valami elromlik
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // hibaüzenet, ha valami nem működne
 
-// HTTP metódus beolvasása
+// HTTP metódus beolvasás
 $method = $_SERVER['REQUEST_METHOD'];
 
 
@@ -19,19 +37,19 @@ if ($method == 'POST') {
     //  POST esetén, azaz új esemény létrehozásánál beolvaszuk a kliens által küldött JSON adatokat
     $data = json_decode(file_get_contents('php://input'));
 
-    // Ellenőrizzük, hogy a kötelező mezők (title, occurrence) meg vannak-e adva
+    // ellenőrizzük, hogy a kötelező mezők (title, occurrence) meg vannak-e adva
     if (!isset($data->title) || !isset($data->occurrence)) {
         http_response_code(400); // 400 Bad Request hiba
-        die(json_encode(["error" => "Title és Occurrence kötelező!"]));
+        die(json_encode(["error" => "You must fill Title and Occurrence data!"]));
     }
 
-    // Az eseményt beszúrjuk az adatbázisba (user_id egyelőre fix érték, ezt később JWT-vel kezeljük)
+    // az eseményt beszúrjuk az adatbázisba (user_id-t JWT-vel kezeljük)
     $stmt = $pdo->prepare('INSERT INTO events (user_id, title, occurrence, description) VALUES (?, ?, ?, ?)');
-    $stmt->execute([1, $data->title, $data->occurrence, $data->description ?? null]);
+    $stmt->execute([$userId, $data->title, $data->occurrence, $data->description ?? null]);
 
-    // Visszaküldjük a sikeres válasz JSON formátumban
+    // visszaküldjük a sikeres válasz JSON formátumban
     header('Content-Type: application/json');
-    echo json_encode(["message" => "Esemény sikeresen létrehozva!"]);
+    echo json_encode(["message" => "Event succesfully created!"]);
     return;
 }
 
@@ -39,13 +57,13 @@ if ($method == 'POST') {
 //                              GET
 
 if ($method == 'GET') {
-    // 📌 Felhasználó saját eseményeinek listázása
+    // 📌 felhasználó saját eseményeinek listázása
 
-    // Lekérdezzük az adott felhasználóhoz tartozó eseményeket
+    // lekérdezzük az adott felhasználóhoz tartozó eseményeket
     $stmt = $pdo->prepare('SELECT * FROM events WHERE user_id = ?');
-    $stmt->execute([1]); // A későbbiekben ezt JWT tokenből kell kiolvasni
+    $stmt->execute([$userId]); // UserId-t JWT tokenből kell kiolvasni
 
-    // Az eseményeket JSON formátumban visszaküldjük a kliensnek
+    // az eseményeket JSON formátumban visszaküldjük a kliensnek
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($events);
     return;
@@ -58,34 +76,34 @@ if ($method == 'GET') {
 if ($method == 'PATCH') {
     header('Content-Type: application/json');
     
-    // Ellenőrizzük, hogy van-e ID a kérésben
+    // ellenőrizzük, hogy van-e ID a kérésben
     if (!isset($_GET['id'])) {
         http_response_code(400);
-        die(json_encode(["error" => "Hiányzó esemény ID!"]));
+        die(json_encode(["error" => "Missing event ID!"]));
     }
 
     $eventId = $_GET['id'];
 
-    // Beolvaszuk a kliens által küldött JSON adatokat
+    // beolvaszuk a kliens által küldött JSON adatokat
     $data = json_decode(file_get_contents('php://input'));
 
-    // Ellenőrizzük, hogy van-e description mező
+    // ellenőrizzük, hogy van-e description mező
     if (!isset($data->description)) {
         http_response_code(400);
-        die(json_encode(["error" => "Hiányzó description mező!"]));
+        die(json_encode(["error" => "You must add a description!"]));
     }
 
-    // Frissítjük az esemény leírását az adatbázisban
+    // frissítjük az esemény leírását az adatbázisban
     $stmt = $pdo->prepare('UPDATE events SET description = ? WHERE id = ? AND user_id = ?');
-    $stmt->execute([$data->description, $eventId, 1]); // JWT után a user_id dinamikus lesz
+    $stmt->execute([$data->description, $eventId, $userId]); // JWT-re hivatkozva a user_id itt is dinamikus
 
-    // Ha nem történt frissítés (pl. rossz ID vagy más user eseménye)
+    // ha nem történt frissítés (pl. rossz ID vagy más user eseménye)
     if ($stmt->rowCount() == 0) {
         http_response_code(403);
-        die(json_encode(["error" => "Nem módosítható az esemény!"]));
+        die(json_encode(["error" => "This event cannot be modified!"]));
     }
 
-    echo json_encode(["message" => "Esemény frissítve!"]);
+    echo json_encode(["message" => "Event has been updated!"]);
     return;
 }
 
@@ -98,25 +116,25 @@ if ($method == 'PATCH') {
 if ($method == 'DELETE') {
     header('Content-Type: application/json');
 
-    // Ellenőrizzük, hogy van-e ID a kérésben
+    // ellenőrizzük, hogy van-e ID a kérésben
     if (!isset($_GET['id'])) {
         http_response_code(400);
-        die(json_encode(["error" => "Hiányzó esemény ID!"]));
+        die(json_encode(["error" => "Missing event ID!"]));
     }
 
     $eventId = $_GET['id'];
 
-    // Töröljük az eseményt, de csak ha az adott user hozta létre
+    // töröljük az eseményt, de csak ha az adott user hozta létre
     $stmt = $pdo->prepare('DELETE FROM events WHERE id = ? AND user_id = ?');
-    $stmt->execute([$eventId, 1]); // JWT után a user_id dinamikus lesz
+    $stmt->execute([$eventId, $userId]);
 
-    // Ha nem történt törlés (pl. rossz ID vagy más user eseménye)
+    // ha nem történt törlés (pl. rossz ID vagy más user eseménye)
     if ($stmt->rowCount() == 0) {
         http_response_code(403);
-        die(json_encode(["error" => "Nem törölhető az esemény!"]));
+        die(json_encode(["error" => "This event cannot be deleted!"]));
     }
 
-    echo json_encode(["message" => "Esemény törölve!"]);
+    echo json_encode(["message" => "Events are successfully deleted!"]);
     return;
 }
 

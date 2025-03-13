@@ -5,6 +5,11 @@ require('./secrets.php');
 
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
 
+if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+  http_response_code(403);
+  die(json_encode(["error" => "Only HTTPS connections are allowed."]));
+}
+
 if ($development) {
   ini_set('display_errors', 1);
   error_reporting(E_ALL);
@@ -30,5 +35,6 @@ if ($resource == 'events') {
 }
 
 if (isset($data)) {
-    echo json_encode($data);
+  header('Content-Type: application/json'); // JSON fejlécet kérek, hogy ne kaphassak null értéket
+  echo json_encode($data);
 }

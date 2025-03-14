@@ -13,6 +13,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // hibaüzenet, h
 // HTTP metódus beolvasás
 $method = $_SERVER['REQUEST_METHOD'];
 
+
 //                                      POST 
 
 if ($method == 'POST') {
@@ -95,16 +96,20 @@ if ($method == 'PATCH') {
 //                                          DELETE
 //                                    Esemény törlése
 
+error_log("🛠️ DELETE kérés érkezett, ID: " . $_GET['id']);
+error_log("🛠️ Felhasználói azonosító: " . $userId);
+
 if ($method == 'DELETE') {
     header('Content-Type: application/json');
 
-    // ellenőrizzük, hogy van-e ID a kérésben
-    if (!isset($_GET['id'])) {
+    parse_str($_SERVER['QUERY_STRING'], $queryParams);
+
+    if (!isset($queryParams['id']) || empty($queryParams['id'])) {
         http_response_code(400);
         die(json_encode(["error" => "Missing event ID!"]));
     }
 
-    $eventId = $_GET['id'];
+    $eventId = (int)$queryParams['id'];
 
     // töröljük az eseményt, de csak ha az adott user hozta létre
     $stmt = $pdo->prepare('DELETE FROM events WHERE id = ? AND user_id = ?');
@@ -116,7 +121,6 @@ if ($method == 'DELETE') {
         die(json_encode(["error" => "This event cannot be deleted!"]));
     }
 
-    echo json_encode(["message" => "Events are successfully deleted!"]);
+    echo json_encode(["message" => "Event successfully deleted!"]);
     return;
 }
-

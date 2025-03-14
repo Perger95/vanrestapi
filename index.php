@@ -1,7 +1,10 @@
 <?php
 
-require('./cors.php');
 require('./secrets.php');
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PATCH, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
 
@@ -18,9 +21,7 @@ if ($development) {
 $resource = strtok($_SERVER['QUERY_STRING'], '=');
 require('auth.php');
 
-if ($resource == 'products') {
-  require('products.php');
-}
+
 if ($resource == 'users') {
   require('users.php');
 }

@@ -35,7 +35,7 @@ Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítet
     
     -Backend: PHP (Vanilla, tehát nincs Laravel vagy más framework)  
 
-    -Adatbázis: MySQL (MariaDB, XAMPP-on)  
+    -Adatbázis: MySQL (MySQL. phpMyAdmin, XAMPP-on)  
 
     -Autentikáció: JWT (JSON Web Token)  
 

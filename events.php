@@ -6,30 +6,12 @@ require('./vendor/autoload.php'); // betöltjük a JWT könyvtárat
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-$headers = apache_request_headers();
-$token = $headers['Authorization'] ?? null;
-
-if (!$token) {
-    http_response_code(401);
-    die(json_encode(["error" => "Missing token!"]));
-}
-
-try {
-    $decoded = JWT::decode($token, new Key($secrets['jwt_secret'], 'HS256'));
-    $userId = $decoded->user_id; // kinyerjük a felhasználó azonosítóját a tokenből
-} catch (Exception $e) {
-    http_response_code(401);
-    die(json_encode(["error" => "Invalid token!"]));
-}
-
-
 // adatbázis kapcsolat létrehozás
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // hibaüzenet, ha valami nem működne
 
 // HTTP metódus beolvasás
 $method = $_SERVER['REQUEST_METHOD'];
-
 
 //                                      POST 
 

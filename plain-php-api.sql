@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 02. 17:48
+-- Létrehozás ideje: 2025. Már 14. 13:43
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.1.17
 
@@ -24,15 +24,58 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Tábla szerkezet ehhez a táblához `events`
+--
+
+CREATE TABLE `events` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `occurrence` datetime NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `events`
+--
+
+INSERT INTO `events` (`id`, `user_id`, `title`, `occurrence`, `description`) VALUES
+(1, 1, 'PHP Workshop', '2025-03-15 14:00:00', 'lets patch this desc!'),
+(5, 1, 'PHP Workshop', '2025-03-15 14:00:00', 'this event is the number 5!'),
+(6, 1, 'PHP Workshop', '2025-03-15 14:00:00', 'hello this is another Test which should be num 6!');
+
+-- --------------------------------------------------------
+
+--
 -- A nézet helyettes szerkezete `gf`
 -- (Lásd alább az aktuális nézetet)
 --
 CREATE TABLE `gf` (
-`id` smallint(5)
+`id` int(11)
 ,`email` varchar(255)
-,`password` varchar(40)
+,`password` varchar(64)
 ,`token` varchar(255)
 );
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `login_attempts`
+--
+
+CREATE TABLE `login_attempts` (
+  `id` int(11) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `failed_attempts` int(11) NOT NULL DEFAULT 0,
+  `last_attempt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `login_attempts`
+--
+
+INSERT INTO `login_attempts` (`id`, `ip_address`, `failed_attempts`, `last_attempt`) VALUES
+(6, '127.0.0.1', 6, '2025-03-14 13:16:34');
 
 -- --------------------------------------------------------
 
@@ -66,7 +109,10 @@ INSERT INTO `products` (`id`, `category`, `name`, `description`, `picture`, `pri
 (10, 'Bogyós', 'Ribizli', 'Fanyar, vasban gazdag', 'https://hur.webmania.cc/img/ribizli.jpg', 1300, 170),
 (11, 'Magyaros', 'Meggy', 'A falusi kincs', 'https://hur.webmania.cc/img/meggy.jpg', 600, 300),
 (12, 'Magyaros', 'Szilva', 'A falusi kincs', 'https://hur.webmania.cc/img/szilva.jpg', 770, 200),
-(13, 'Magyaros', 'cseresznye', 'finom jóféle', 'https://cseresznyeinfo.hu/wp-content/uploads/2021/01/cseresznye_erese.jpg', 2050, 600);
+(13, 'Magyaros', 'cseresznye', 'finom jóféle', 'https://cseresznyeinfo.hu/wp-content/uploads/2021/01/cseresznye_erese.jpg', 2050, 600),
+(14, 'Ruha', 'farmernadrág', 'de szép nadrág ez', 'http://valami.huhuh/pic.jpg', 500, 12),
+(15, 'Ruha', 'zokni', 'de szép zokni ez', 'http://valami.huhuh/pic.jpg', 200, 100),
+(16, 'Ruha', 'alsogatya', 'de szép bugyi ez', 'http://valami.huhuh/pic.jpg', 240, 150);
 
 -- --------------------------------------------------------
 
@@ -75,18 +121,20 @@ INSERT INTO `products` (`id`, `category`, `name`, `description`, `picture`, `pri
 --
 
 CREATE TABLE `users` (
-  `id` smallint(5) NOT NULL,
+  `id` int(11) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `password` varchar(40) NOT NULL,
-  `token` varchar(255) NOT NULL
+  `password` varchar(64) DEFAULT NULL,
+  `token` varchar(255) NOT NULL,
+  `reset_token` varchar(64) DEFAULT NULL,
+  `reset_expires` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `token`) VALUES
-(1, 'miskolc@nemletezik.cc', '17c025bbfcfc52116e76600a723f9937', '270%jidO4oJKiDuij$dja23!JfjIIFO4oloD');
+INSERT INTO `users` (`id`, `email`, `password`, `token`, `reset_token`, `reset_expires`) VALUES
+(1, 'miskolc@nemletezik.cc', 'e91a001f61abe3f78f66f8db3dbb390967aa3c759b0632bc47b32bf9757d367d', '270%jidO4oJKiDuij$dja23!JfjIIFO4oloD', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -100,6 +148,19 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 -- Indexek a kiírt táblákhoz
 --
+
+--
+-- A tábla indexei `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- A tábla indexei `login_attempts`
+--
+ALTER TABLE `login_attempts`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- A tábla indexei `products`
@@ -120,16 +181,38 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT a táblához `events`
+--
+ALTER TABLE `events`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT a táblához `login_attempts`
+--
+ALTER TABLE `login_attempts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT a táblához `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` smallint(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` smallint(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` smallint(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Megkötések a kiírt táblákhoz
+--
+
+--
+-- Megkötések a táblához `events`
+--
+ALTER TABLE `events`
+  ADD CONSTRAINT `events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

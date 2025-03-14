@@ -4,10 +4,10 @@
 
 |  URL                  | HTTP METHOD | AUTH | JSON Response       |
 |-----------------------|-------------|------|---------------------|
-| ?user=login           | POST        |      | user's token        |
+| ?users=login          | POST        |      | user's token        |
 | ?users=register       | POST        |      | new user            |
-| ?users=reset-password | POST        |      | new user            |
-| ?users=new-password   | POST        |      | new user            |
+| ?users=reset-password | POST        |      | reset token->email  |
+| ?users=new-password   | POST        |      | edit  user pw       |
 
 |  URL           | HTTP METHOD | AUTH | JSON Response       |
 |----------------|-------------|------|---------------------|

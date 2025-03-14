@@ -18,12 +18,6 @@ if ($development) {
 $resource = strtok($_SERVER['QUERY_STRING'], '=');
 require('auth.php');
 
-// Itt erőltetve engedélyeztem a PATCH és DELETE metódusokat, mert teszteléskor olyan volt, mintha az Apache nem támogatná őket
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
-    $_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
-}
-
-
 if ($resource == 'products') {
   require('products.php');
 }
@@ -35,6 +29,6 @@ if ($resource == 'events') {
 }
 
 if (isset($data)) {
-  header('Content-Type: application/json'); // JSON fejlécet kérek, hogy ne kaphassak null értéket
+  header('Content-Type: application/json'); 
   echo json_encode($data);
 }

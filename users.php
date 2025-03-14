@@ -37,10 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $currentTime = time();
     
             // Ha 5 percen belül 5 sikertelen próbálkozás volt, tiltás
-            if ($failedAttempts >= 5 && ($currentTime - $lastAttempt) < 300) {
+            if ($failedAttempts >= 5 && ($currentTime - $lastAttempt) < 15) {
                 http_response_code(429);
                 die(json_encode(["error" => "Too many failed login attempts. Try again later."]));
             }
+        
+            
         }
     
         // Eredeti bejelentkezési ellenőrzés

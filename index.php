@@ -2,10 +2,6 @@
 
 require('./secrets.php');
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PATCH, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
 
 if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
@@ -29,7 +25,13 @@ if ($resource == 'events') {
     require('events.php'); 
 }
 
-if (isset($data)) {
-  header('Content-Type: application/json'); 
-  echo json_encode($data);
+if ($resource == 'helpdesk') {
+  require('helpdesk.php');
 }
+
+
+ // Ki kellett szednem, mert duplikált JSON objektumot kaptam a válasz mellé és zavaró volt
+//if (isset($data) && !in_array($_GET['helpdesk'] ?? '', ['helpdesk', 'users', 'events'])) { 
+//header('Content-Type: application/json'); 
+//echo json_encode($data);
+//}

@@ -15,14 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     return;
 }
 
-// POST kérés esetén, megnézi, hogy bejelentkezésről vagy regisztrációról van-e szó
+// POST kérés - bejelentkezés / regisztráció ?
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data = json_decode(file_get_contents('php://input'));
     $requestUser = trim($_GET['users'] ?? '', " ?");
 
     error_log("Requested endpoint after trim: " . $requestUser);
 
-    //// BEJELENTKEZÉS (POST /users=login)
+    //// BEJELENTKEZÉS
     if ($requestUser === 'login') {
         $ip = $_SERVER['REMOTE_ADDR'];
         $stmt = $pdo->prepare('SELECT failed_attempts, last_attempt FROM login_attempts WHERE ip_address = ?');
@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $lastAttempt = strtotime($attempt['last_attempt']);
             $currentTime = time();
     
-            // Ha 5 percen belül 5 sikertelen próbálkozás volt, tiltás
-            if ($failedAttempts >= 5 && ($currentTime - $lastAttempt) < 5) {
+            // Ha 3 percen belül 5 sikertelen próbálkozás volt, tiltás
+            if ($failedAttempts >= 5 && ($currentTime - $lastAttempt) < 180) {
                 http_response_code(429);
                 die(json_encode(["error" => "Too many failed login attempts. Try again later."]));
             }

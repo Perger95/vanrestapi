@@ -17,7 +17,7 @@ if (empty($_SERVER['QUERY_STRING'])) {
 // feketelista kivételei, itt sem kell auth
 $noAuthResources = [
     'GET' => ['products'],
-    'POST' => ['users'],
+    'POST' => ['users','helpdesk'],
     'PATCH' => [],
     'DELETE' => []
 ];

@@ -1,4 +1,19 @@
-# Vanilla PHP REST API - UCC project
+# Vanilla PHP REST API - UCC project - Eseménykezelő rendszer**
+
+Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítettem el. Egy eseménykezelő rendszer létrehozása volt a célom, amelyen keresztül a felhasználók eseményeket hozhatnak létre, listázhatják, szerkeszthetik és törölhetik azokat. 
+------
+
+## ** Felhasznált technológiák**  
+    
+    -Backend: PHP (Vanilla, tehát nincs Laravel vagy más framework)  
+
+    -Adatbázis: MySQL (MySQL. phpMyAdmin, XAMPP-on)  
+
+    -Autentikáció: JWT (JSON Web Token)  
+
+    -Biztonság: HTTPS, SQL Injection védelem, Token alapú hitelesítés  
+
+--- 
 
 ## Endpoints (végpontok)
 
@@ -24,21 +39,3 @@
 | ?events/:id    | PATCH       |  Y   | updated event       |
 | ?events/:id    | DELETE      |  Y   | true / false        |
 
-
-
-# **Plain PHP REST API – Eseménykezelő rendszer**
-
-Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítettem el. Egy eseménykezelő rendszer létrehozása volt a célom, amelyen keresztül a felhasználók eseményeket hozhatnak létre, listázhatják, szerkeszthetik és törölhetik azokat. 
-------
-
-## ** Felhasznált technológiák**  
-    
-    -Backend: PHP (Vanilla, tehát nincs Laravel vagy más framework)  
-
-    -Adatbázis: MySQL (MariaDB, XAMPP-on)  
-
-    -Autentikáció: JWT (JSON Web Token)  
-
-    -Biztonság: HTTPS, SQL Injection védelem, Token alapú hitelesítés  
-
---- 

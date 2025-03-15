@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail->setFrom('smtpfortestingprgr@gmail.com', 'Password Reset');
             $mail->addAddress($data->email);
 
-            $resetLink = "https://localhost/plain-php-api/index.php?users=new-password&token=" . $resetToken;
+            $resetLink = "https://localhost:5173/reset-password?token=" . $resetToken;
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
             $mail->Body = "<h3>Password Reset Request</h3>

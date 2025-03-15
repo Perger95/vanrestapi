@@ -5,13 +5,39 @@ Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítet
 
 ## ** Felhasznált technológiák**  
     
-    -Backend: PHP (Vanilla, tehát nincs Laravel vagy más framework)  
+    Backend:
 
-    -Adatbázis: MySQL (MySQL. phpMyAdmin, XAMPP-on)  
+PHP (Vanilla, framework nélkül)
 
-    -Autentikáció: JWT (JSON Web Token)  
+MySQL (phpMyAdmin, XAMPP-on keresztül)
 
-    -Biztonság: HTTPS, SQL Injection védelem, Token alapú hitelesítés  
+JWT autentikáció (felhasználói hitelesítéshez)
+
+SQL Injection védelem (prepared statements)
+
+Gmail SMTP (jelszó-visszaállító e-mailek küldéséhez)
+
+Google Gemini AI (FAQ és chatbot válaszadás)
+
+    Frontend:
+
+Vite + React (modern, gyors fejlesztőkörnyezet)
+
+React Router (oldalváltások kezelése)
+
+Fetch API (backend kommunikációhoz)
+
+Bootstrap / CSS styling (stílusokhoz)
+
+Böngésző DevTools (Debughoz)
+
+    Fejlesztői eszközök:
+
+Insomnia (REST API teszteléshez)
+
+XAMPP (Apache szerver és MySQL adatbázis futtatására)
+
+Git & GitHub (verziókezeléshez)
 
 --- 
 
@@ -39,3 +65,6 @@ Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítet
 | ?events/:id    | PATCH       |  Y   | updated event       |
 | ?events/:id    | DELETE      |  Y   | true / false        |
 
+|  URL           | HTTP METHOD | AUTH | JSON Response       |
+|----------------|-------------|------|---------------------|
+| ?helpdesk      | POST        |  Y   | input -> Gemini     |

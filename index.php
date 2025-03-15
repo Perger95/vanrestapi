@@ -2,6 +2,8 @@
 
 require('./secrets.php');
 
+header("Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS");
+
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
 
 // Ha OPTIONS kérés érkezik, válaszoljunk, de NE lépjünk ki!

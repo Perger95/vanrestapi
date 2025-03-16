@@ -18,12 +18,11 @@ if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
     die(json_encode(["error" => "Only HTTPS connections are allowed."]));
 }
 
-// ** FONTOS ** Egyszerűsített query kezelés
+// FONTOS, Egyszerűsített query kezelés
 $resource = strtok($_SERVER['QUERY_STRING'], '=');
 require('auth.php');
 
-// 🔍 Ellenőrizzük, hogy a `$resource` változó valóban tartalmaz-e értéket
-error_log("🛠️ API Request received: " . $resource);
+// Ellenőrizzük, hogy a `$resource` változó valóban tartalmaz-e értéket
 
 // Query paraméterek feldolgozása
 parse_str($_SERVER['QUERY_STRING'], $queryParams);

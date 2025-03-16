@@ -79,9 +79,9 @@ $response = $client->post('https://generativelanguage.googleapis.com/v1beta/mode
         "contents" => [
             [
                 "parts" => [
-                    // 🔹 Rejtett prompt (user nem látja)
+                    // Rejtett prompt (user nem látja)
                     ["text" => "Fontos! Kérlek mindig rövid választ adj, maximum 2 mondatban! "],
-                    // 🔹 Felhasználó kérdése
+                    // Felhasználó kérdése
                     ["text" => $data->question]
                 ]
             ]

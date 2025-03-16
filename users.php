@@ -1,22 +1,21 @@
 <?php
 
 require('./secrets.php');
-require('./vendor/autoload.php'); // Betöltjük a JWT és PHPMailer könyvtárakat
+require('./vendor/autoload.php');
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Adatbázis kapcsolat inicializálása
 $pdo = new PDO('mysql:host=localhost;dbname=' . $secrets['mysqlDb'], $secrets['mysqlUser'], $secrets['mysqlPass']);
 
-// POST kérés azonosítása
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data = json_decode(file_get_contents('php://input'));
     $requestUser = trim($_GET['users'] ?? '', " ?");
 
-    error_log("Requested endpoint after trim: " . $requestUser);
+
+    
 
     ////                                                    **BEJELENTKEZÉS**
     if ($requestUser === 'login') {
@@ -25,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$ip]);
         $attempt = $stmt->fetch(PDO::FETCH_ASSOC);
     
-        //                      Rate limiting
+        //                                                      !Rate limiting! Brute force ellen
         if ($attempt) {
             $failedAttempts = $attempt['failed_attempts'];
             $lastAttempt = strtotime($attempt['last_attempt']);
@@ -39,11 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
         // JSON input beolvasása
         $data = json_decode(file_get_contents('php://input'));
-    
+
         if (!isset($data->email) || !isset($data->password)) {
             http_response_code(400);
-            die(json_encode(["error" => "Email and password are required!"]));
-        }
+            die(json_encode(["error" => "Email and password are required!"]));}
     
         // Jelszó ellenőrzés bcrypt-tel
         $stmt = $pdo->prepare('SELECT id, password FROM users WHERE email = ?');
@@ -63,31 +61,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             die(json_encode(["error" => "Incorrect email or password!"]));
         }
     
-        // Sikeres bejelentkezés -> reset Rate limiting
+        //  Sikeres bejelentkezés -> reset Rate limiting
         $stmt = $pdo->prepare('DELETE FROM login_attempts WHERE ip_address = ?');
         $stmt->execute([$ip]);
     
-        // 🔹 Token generálás (1 órás lejárattal)
+        // Token generálás (1 órás lejárattal)
         $expiresAt = date('Y-m-d H:i:s', time() + 3600);
         $payload = [
             "user_id" => $user['id'],
-            "exp" => time() + 3600  // Token 1 órán belül lejár
-        ];
+            "exp" => time() + 3600 ];  // Token 1 órán belül lejár
+
         $token = JWT::encode($payload, $secrets['jwt_secret'], 'HS256');
-    
-        // 🔹 Token és lejárati idő mentése az adatbázisba
-        $stmt = $pdo->prepare('UPDATE users SET token = ?, token_expires = ? WHERE id = ?');
+        $stmt = $pdo->prepare('UPDATE users SET token = ?, token_expires = ? WHERE id = ?'); // Token és lejárati idő mentése az adatbázisba
         $stmt->execute([$token, $expiresAt, $user['id']]);
-    
-        // 🔹 JWT visszaküldése a kliensnek
-        echo json_encode(["token" => $token]);
+        echo json_encode(["token" => $token]); // JWT visszaküldése a kliensnek
         return;
     }
 
 
     
 
-    //// 📝 **REGISZTRÁCIÓ (`POST /users=register`)**
+    ////                                            REGISZTRÁCIÓ
     if ($requestUser === 'register') {
         if (!isset($data->email) || !isset($data->password)) {
             http_response_code(400);
@@ -109,12 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         return;
     }
 
-    //// 🔄 **JELSZÓ-VISSZAÁLLÍTÁS KÉRÉS (`POST /users=reset-password`)**
+    ////                                    JELSZÓ-VISSZAÁLLÍTÁS KÉRÉS
     if ($requestUser === 'reset-password') {
         if (!isset($data->email)) {
             http_response_code(400);
-            die(json_encode(["error" => "Email is required"]));
-        }
+            die(json_encode(["error" => "Email is required"]));}
 
         $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
         $stmt->execute([$data->email]);
@@ -122,18 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if (!$user) {
             http_response_code(400);
-            die(json_encode(["error" => "Email address not found"]));
-        }
+            die(json_encode(["error" => "Email address not found"]));}
 
-        // Token generálás
+        //   Token generálás
         $resetToken = bin2hex(random_bytes(32));
         $expiresAt = date('Y-m-d H:i:s', time() + 300); // 5 percig érvényes
-
         $stmt = $pdo->prepare('UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?');
         $stmt->execute([hash('sha256', $resetToken), $expiresAt, $data->email]);
-
-        // 🔹 **EMAIL KÜLDÉS**
-        $mail = new PHPMailer(true);
+        $mail = new PHPMailer(true); //  EMAIL KÜLDÉS
 
         try {
             $mail->isSMTP();
@@ -167,21 +156,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($requestUser === 'logout') {
         $data = json_decode(file_get_contents('php://input'));
-    
         if (!isset($data->token)) {
             http_response_code(400);
-            die(json_encode(["error" => "Token is required."]));
-        }
-    
-        // 🔹 Az adatbázisban töröljük a tokent és a lejárati idejét
-        $stmt = $pdo->prepare('UPDATE users SET token = NULL, token_expires = NULL WHERE token = ?');
+            die(json_encode(["error" => "Token is required."])); }
+        $stmt = $pdo->prepare('UPDATE users SET token = NULL, token_expires = NULL WHERE token = ?');  //  Az adatbázisban töröljük a tokent és a lejárati idejét
         $stmt->execute([$data->token]);
-    
         echo json_encode(["message" => "Successfully logged out."]);
         return;
     }
 
-//// 🔄 **ÚJ JELSZÓ BEÁLLÍTÁSA (`POST /users=new-password`)**
+////                                            ÚJ JELSZÓ BEÁLLÍTÁSA
 if ($requestUser === 'new-password') {
     if (!isset($data->token) || !isset($data->new_password)) {
         http_response_code(400);
@@ -200,13 +184,10 @@ if ($requestUser === 'new-password') {
         die(json_encode(["error" => "Invalid or expired token"]));
     }
 
-    // 🔒 **Új jelszó bcrypt hash-elése**
+    // Új jelszó bcrypt hash-elése
     $hashedPassword = password_hash($data->new_password, PASSWORD_BCRYPT);
-
-    // Jelszó frissítése az adatbázisban + reset token törlése
-    $stmt = $pdo->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?');
+    $stmt = $pdo->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?'); // Jelszó frissítése az adatbázisban + reset token törlése
     $stmt->execute([$hashedPassword, $user['id']]);
-
     echo json_encode(["message" => "Password has been successfully reset."]);
     return;
 }

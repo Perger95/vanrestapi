@@ -13,10 +13,10 @@ if (empty($_SERVER['QUERY_STRING'])) {
     return true;
 }
 
-// 🔹 Feketelista kivételei (autentikáció NEM kell ezekhez a végpontokhoz)
+//  Feketelista kivételei
 $noAuthResources = [
     'GET' => ['new-password', 'reset-password'],
-    'POST' => ['users','new-password', 'reset-password', 'login'], // 🔹 Hozzáadtuk a `login` végpontot!
+    'POST' => ['users','new-password', 'reset-password', 'login'], // Hozzáadtuk a `login` végpontot!
     'PATCH' => [],
     'DELETE' => []
 ];
@@ -30,7 +30,7 @@ if (in_array($resource, $noAuthResources[$_SERVER['REQUEST_METHOD']] ?? [])) {
     return true;
 }
 
-// 🔑 Token ellenőrzés (Authorization fejléc)
+// Token ellenőrzés (Authorization fejléc)
 $headers = getallheaders();
 $token = $headers['Authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? null;
 
@@ -50,7 +50,7 @@ try {
     $decoded = JWT::decode($token, new Key($secrets['jwt_secret'], 'HS256'));
     $userId = $decoded->user_id;
 
-    // 🔹 Token ellenőrzés az adatbázisban (a PDO már az index.php-ban van!)
+    // Token ellenőrzés az adatbázisban (a PDO már az index.php-ban van!)
     global $pdo;
     $stmt = $pdo->prepare('SELECT token, token_expires FROM users WHERE id = ?');
     $stmt->execute([$userId]);

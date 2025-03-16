@@ -5,10 +5,8 @@
     RewriteRule . /index.php [L]
 </IfModule>
 
-# Engedélyezzük a PHP futtatását
 AddHandler application/x-httpd-php .php
 
-# Engedélyezzük a CORS-t, ha szükséges
 Header always set Access-Control-Allow-Origin "*"
 Header always set Access-Control-Allow-Methods "GET, POST, PATCH, DELETE, OPTIONS"
 Header always set Access-Control-Allow-Headers "Authorization, Content-Type"

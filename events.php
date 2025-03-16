@@ -39,13 +39,11 @@ if ($method == 'POST') {
 //                              GET
 
 if ($method == 'GET') {
-    // 📌 felhasználó saját eseményeinek listázása
+    // felhasználó saját eseményeinek listázása
 
     // lekérdezzük az adott felhasználóhoz tartozó eseményeket
     $stmt = $pdo->prepare('SELECT * FROM events WHERE user_id = ?');
     $stmt->execute([$userId]); // UserId-t JWT tokenből kell kiolvasni
-
-    // az eseményeket JSON formátumban visszaküldjük a kliensnek
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($events);
     return;
@@ -58,8 +56,6 @@ if ($method == 'GET') {
 if ($method == 'PATCH') {
     header('Content-Type: application/json');
 
-    error_log("🔄 PATCH request received!");
-
     if (!isset($_GET['events'])) { 
         http_response_code(400);
         die(json_encode(["error" => "Missing event ID!"]));
@@ -67,8 +63,6 @@ if ($method == 'PATCH') {
 
     $eventId = $_GET['events']; 
     $data = json_decode(file_get_contents('php://input'));
-
-    error_log("🔍 Event ID: $eventId, User ID: $userId, Data: " . json_encode($data));
 
     if (!isset($data->description)) {
         http_response_code(400);
@@ -88,12 +82,9 @@ if ($method == 'PATCH') {
 }
 
 
-
 //                                          DELETE
 //                                    Esemény törlése
 
-error_log("🛠️ DELETE kérés érkezett, ID: " . $_GET['id']);
-error_log("🛠️ Felhasználói azonosító: " . $userId);
 
 if ($method == 'DELETE') {
     header('Content-Type: application/json');

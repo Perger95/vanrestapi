@@ -21,17 +21,17 @@ if (!isset($data->question)) {
     die(json_encode(["error" => "You must ask a question!"]));
 }
 
-// 🔍 Keresés az adatbázisban – Intelligensebb egyezés
+// Keresés az adatbázisban – Intelligensebb egyezés
 $stmt = $pdo->query("SELECT question, answer FROM faq");
 $faqItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $bestMatch = null;
 $bestScore = 0; // Legjobb egyezés százalékosan
 
-// 🔹 Gyakori szavak listája (stopwords)
+// Gyakori szavak listája (stopwords)
 $stopwords = ["tudok", "Mi","lehet", "van", "hogyan", "módon", "kell", "csinálni", "meg", "itt", "?", "!"];
 
-// ✅ Normalizáló függvény – kisbetűsítés + stopwords eltávolítás + felesleges karakterek törlése
+//  Normalizáló függvény – kisbetűsítés + stopwords eltávolítás + felesleges karakterek törlése
 function normalizeText($text, $stopwords) {
     $text = strtolower(trim($text)); // Kisbetűsítés és felesleges szóközök törlése
     $text = preg_replace('/[^a-z0-9áéíóöőúüű ]/i', '', $text); // Speciális karakterek eltávolítása
@@ -45,10 +45,10 @@ $userQuestion = normalizeText($data->question, $stopwords);
 foreach ($faqItems as $faq) {
     $faqQuestion = normalizeText($faq['question'], $stopwords);
 
-    // 🔹 Szórendi egyezés és hasonlóság számítás
+    //  Szórendi egyezés és hasonlóság számítás
     similar_text($userQuestion, $faqQuestion, $percent);
     
-    // 🔹 Részleges egyezés – ha az egyik kérdés tartalmazza a másikat
+    //  Részleges egyezés – ha az egyik kérdés tartalmazza a másikat
     if (strpos($faqQuestion, $userQuestion) !== false || strpos($userQuestion, $faqQuestion) !== false) {
         $percent = 100; // Teljes egyezésnek vesszük
     }
@@ -69,7 +69,7 @@ if ($bestMatch && $bestScore > 50) { // 🔹 Most még tágabb: 50% vagy jobb
 
 
 
-// 🔥 AI API hívás (ha nincs találat az adatbázisban)
+// AI API hívás (ha nincs találat az adatbázisban)
 $client = new Client();
 $response = $client->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $secrets['google_gemini_api_key'], [
     'headers' => [

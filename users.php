@@ -79,30 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
 
-    
-
-    ////                                            REGISZTRÁCIÓ
-    if ($requestUser === 'register') {
-        if (!isset($data->email) || !isset($data->password)) {
-            http_response_code(400);
-            die(json_encode(["error" => "Email and password are required!"]));
-        }
-
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
-        $stmt->execute([$data->email]);
-        if ($stmt->fetch()) {
-            http_response_code(400);
-            die(json_encode(["error" => "This Email is already used."]));
-        }
-
-        $hashedPassword = password_hash($data->password, PASSWORD_BCRYPT);
-        $stmt = $pdo->prepare('INSERT INTO users (email, password) VALUES (?, ?)');
-        $stmt->execute([$data->email, $hashedPassword]);
-
-        echo json_encode(["message" => "Successfully registered!"]);
-        return;
-    }
-
     ////                                    JELSZÓ-VISSZAÁLLÍTÁS KÉRÉS
     if ($requestUser === 'reset-password') {
         if (!isset($data->email)) {

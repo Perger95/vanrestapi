@@ -1,6 +1,7 @@
 # Vanilla PHP REST API - UCC project - Eseménykezelő rendszer**
 
-Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítettem el. Egy eseménykezelő rendszer létrehozása volt a célom, amelyen keresztül a felhasználók eseményeket hozhatnak létre, listázhatják, szerkeszthetik és törölhetik azokat. 
+Ez egy egyszerű REST API, amit Vanilla PHP és MySQL segítségével készítettem el. Egy eseménykezelő rendszer létrehozása volt a célom, amelyen keresztül a felhasználók eseményeket hozhatnak létre, listázhatják, szerkeszthetik és törölhetik azokat.
+A rendszer több felhasználót is képes kezelni és minden felhasználó csak a hozzá kapcsolódó eseményeket képes kezelni. 
 ------
 
 ## ** Felhasznált technológiák**  
